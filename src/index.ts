@@ -93,3 +93,22 @@ app.post("/login", async (req: Request, res: Response) => {
     });
   }
 });
+
+app.get("/user/profile", async (req: Request, res: Response) => {
+  try {
+    const token = req.headers.authorization as string;
+
+    const authData = auth.getData(token);
+    const userInfo = await userDb.getUserById(authData.id)
+
+    res.status(200).send({
+      id: userInfo.id,
+      name: userInfo.name,
+      email: userInfo.email
+    });
+  } catch (err) {
+    res.status(400).send({
+      message: err.message,
+    });
+  }
+});
