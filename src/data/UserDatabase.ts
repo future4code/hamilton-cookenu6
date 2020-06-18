@@ -4,25 +4,25 @@ import { BaseDataBase } from "./BaseDataBase";
 dotenv.config();
 
 export class UserDB extends BaseDataBase {
-  private static TABLE_NAME = "";
+  private static TABLE_NAME = "Users";
 
-  public async create(
+  public async createUser(
     id: string,
+    name: string,
     email: string,
-    password: string,
-    role: string
+    password: string
   ): Promise<void> {
     await this.getConnection()
       .insert({
         id,
+        name,
         email,
         password,
-        role,
       })
       .into(UserDB.TABLE_NAME);
   }
 
-  public async getUser(email: string): Promise<any> {
+  public async getUserByEmail(email: string): Promise<any> {
     const result = await this.getConnection()
       .select("*")
       .from(UserDB.TABLE_NAME)
