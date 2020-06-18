@@ -59,3 +59,37 @@ app.post("/signup", async (req: Request, res: Response) => {
     });
   }
 });
+
+app.post("/login", async (req: Request, res: Response) => {
+  try {
+    const userData = {
+      email: req.body.email,
+      password: req.body.password,
+    };
+
+    if (!userData.email && userData.email.indexOf("@") === -1) {
+      throw new Error("Invalid Email");
+    }
+
+    const user = await userDb.getUserByEmail(userData.email);
+
+    const decryptedPassword = hashManager.compare(
+      userData.password,
+      user.password
+    );
+
+    if (!decryptedPassword) {
+      throw new Error("Invalid Password");
+    }
+
+    const token = auth.generateToken({ id: user.id });
+
+    res.status(200).send({
+      token,
+    });
+  } catch (err) {
+    res.status(400).send({
+      message: err.message,
+    });
+  }
+});

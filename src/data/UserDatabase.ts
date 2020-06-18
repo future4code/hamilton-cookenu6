@@ -22,7 +22,7 @@ export class UserDB extends BaseDataBase {
       .into(UserDB.TABLE_NAME);
   }
 
-  public async getUser(email: string): Promise<any> {
+  public async getUserByEmail(email: string): Promise<any> {
     const result = await this.getConnection()
       .select("*")
       .from(UserDB.TABLE_NAME)
