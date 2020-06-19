@@ -42,15 +42,19 @@ export class UserDB extends BaseDataBase {
     await this.getConnection().del().from(UserDB.TABLE_NAME).where({ id });
   }
 
-  public async createRecipe (id: string, title: string, description: string): Promise<any> {
-    await this.getConnection().raw(`
-      INSERT INTO Recipe 
-      VALUES (
-        "${id}",${title}","${description}, 
-        date: SELECT DATE_FORMAT(CURDATE(), '%d/%m/%Y') today; 
-      )
-    `);
+  public async createRecipe(
+    id: string,
+    title: string,
+    description: string
+  ): Promise<any> {
+    const date = new Date();
+    await this.getConnection()
+      .insert({
+        id,
+        title,
+        description,
+        date,
+      })
+      .into("Recipes");
   }
-};
-
-
+}
