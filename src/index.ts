@@ -4,6 +4,7 @@ import { HashManager } from "./services/HashManager";
 import { IdGenerator } from "./services/IdGenerator";
 import { UserDB } from "./data/UserDatabase";
 import { Authenticator } from "./services/Authenticator";
+import { userInfo } from "os";
 
 const app = express();
 
@@ -125,6 +126,40 @@ app.get("/user/:id", async (req: Request, res: Response) => {
       id: userInfo.id,
       name: userInfo.name,
       email: userInfo.email,
+    });
+  } catch (err) {
+    res.status(200).send({
+      message: err.message,
+    });
+  }
+});
+
+
+
+app.post("/create/recipe", async (req: Request, res: Response) => {
+  try {
+    const token = req.headers.authorization as string;
+    auth.getData(token);
+
+    const recipeData = {
+      title: req.body.title,
+      description: req.body.description     
+    };
+
+    const id = idManager.generate()
+    
+    if(!recipeData.title){
+      throw new Error("Invalid title"); 
+    }
+
+    if(!recipeData.description){
+      throw new Error("Invalid description"); 
+    }  
+    
+    await userDb.createRecipe( id, recipeData.title, recipeData.description )
+
+    res.status(200).send({
+      message: "Recipe successfuly registered"
     });
   } catch (err) {
     res.status(200).send({
