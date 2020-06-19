@@ -121,9 +121,10 @@ app.get("/user/profile", async (req: Request, res: Response) => {
 app.get("/user/feed", async (req: Request, res: Response) => {
   try {
     const token = req.headers.authorization as string;
-    auth.getData(token);
+    const idData = auth.getData(token);
+    const userId = idData.id;
 
-    const recipes = await userDb.getRecipes();
+    const recipes = await userDb.getRecipes(userId);
 
     res.status(200).send({ recipes });
   } catch (err) {
