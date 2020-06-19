@@ -71,4 +71,11 @@ export class UserDB extends BaseDataBase {
       .insert({user_id, follower_id})
       .into("Followers")      
   }
+
+  public async unfollowUser(user_id: string, follower_id: string): Promise<void> {
+    await this.getConnection().del().from("Followers").where({ user_id, follower_id });    
+  }
+
+  
 }
+

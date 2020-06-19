@@ -199,7 +199,30 @@ app.post("/user/follow", async (req: Request, res: Response) => {
     await userDb.followUser(userId, followerId);
 
     res.status(200).send({
-      message: "Seguido com sucesso."
+      message: "Followed successfully."
+    });
+  }catch (err) {
+    res.status(400).send({
+      message: err.message,
+    });
+  }
+});
+
+
+app.post("/user/unfollow", async (req: Request, res: Response) => {
+  try{
+    const token = req.headers.authorization as string;
+    const idData = auth.getData(token);
+    const userId = idData.id;
+
+    const followerId = req.body.userToUnfollowId;
+
+    
+
+    await userDb.unfollowUser(userId, followerId);
+
+    res.status(200).send({
+      message: "Unfollowed successfully."
     });
   }catch (err) {
     res.status(400).send({
