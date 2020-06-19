@@ -4,7 +4,7 @@ import { HashManager } from "./services/HashManager";
 import { IdGenerator } from "./services/IdGenerator";
 import { UserDB } from "./data/UserDatabase";
 import { Authenticator } from "./services/Authenticator";
-import { userInfo } from "os";
+import { BaseDataBase } from "./data/BaseDataBase";
 
 const app = express();
 
@@ -59,6 +59,8 @@ app.post("/signup", async (req: Request, res: Response) => {
       message: err.message,
     });
   }
+
+  await BaseDataBase.destroyConnection();
 });
 
 app.post("/login", async (req: Request, res: Response) => {
@@ -93,6 +95,7 @@ app.post("/login", async (req: Request, res: Response) => {
       message: err.message,
     });
   }
+  await BaseDataBase.destroyConnection();
 });
 
 app.get("/user/profile", async (req: Request, res: Response) => {
@@ -112,6 +115,23 @@ app.get("/user/profile", async (req: Request, res: Response) => {
       message: err.message,
     });
   }
+  await BaseDataBase.destroyConnection();
+});
+
+app.get("/user/feed", async (req: Request, res: Response) => {
+  try {
+    const token = req.headers.authorization as string;
+    auth.getData(token);
+
+    const recipes = await userDb.getRecipes();
+
+    res.status(200).send({ recipes });
+  } catch (err) {
+    res.status(400).send({
+      message: err.message,
+    });
+  }
+  await BaseDataBase.destroyConnection();
 });
 
 app.get("/user/:id", async (req: Request, res: Response) => {
@@ -132,12 +152,14 @@ app.get("/user/:id", async (req: Request, res: Response) => {
       message: err.message,
     });
   }
+  await BaseDataBase.destroyConnection();
 });
 
 app.post("/create/recipe", async (req: Request, res: Response) => {
   try {
     const token = req.headers.authorization as string;
-    auth.getData(token);
+    const idData = auth.getData(token);
+    const userId = idData.id;
 
     const recipeData = {
       title: req.body.title,
@@ -154,7 +176,12 @@ app.post("/create/recipe", async (req: Request, res: Response) => {
       throw new Error("Invalid description");
     }
 
-    await userDb.createRecipe(id, recipeData.title, recipeData.description);
+    await userDb.createRecipe(
+      id,
+      recipeData.title,
+      recipeData.description,
+      userId
+    );
 
     res.status(200).send({
       message: "Recipe successfuly registered",
@@ -164,6 +191,7 @@ app.post("/create/recipe", async (req: Request, res: Response) => {
       message: err.message,
     });
   }
+  await BaseDataBase.destroyConnection();
 });
 
 app.get("/recipe/:id", async (req: Request, res: Response) => {
@@ -185,53 +213,57 @@ app.get("/recipe/:id", async (req: Request, res: Response) => {
       message: err.message,
     });
   }
+  await BaseDataBase.destroyConnection();
 });
 
-
 app.post("/user/follow", async (req: Request, res: Response) => {
-  try{
+  try {
     const token = req.headers.authorization as string;
     const idData = auth.getData(token);
     const userId = idData.id;
 
     const followerId = req.body.userToFollowId;
-    const checkUser = await userDb.checkId(userId, followerId)
-    
-    if(checkUser){
-      throw new Error("Ja ta seguindo")
+    const checkUser = await userDb.checkId(userId, followerId);
+
+    if (checkUser) {
+      throw new Error("You already followed this user");
     }
 
     await userDb.followUser(userId, followerId);
 
     res.status(200).send({
-      message: "Followed successfully."
+      message: "Followed successfully.",
     });
-  }catch (err) {
+  } catch (err) {
     res.status(400).send({
       message: err.message,
     });
   }
+  await BaseDataBase.destroyConnection();
 });
 
-
 app.post("/user/unfollow", async (req: Request, res: Response) => {
-  try{
+  try {
     const token = req.headers.authorization as string;
     const idData = auth.getData(token);
     const userId = idData.id;
 
     const followerId = req.body.userToUnfollowId;
+    const checkUser = await userDb.checkId(userId, followerId);
 
-    
+    if (!checkUser) {
+      throw new Error("You dont follow this user");
+    }
 
     await userDb.unfollowUser(userId, followerId);
 
     res.status(200).send({
-      message: "Unfollowed successfully."
+      message: "Unfollowed successfully",
     });
-  }catch (err) {
+  } catch (err) {
     res.status(400).send({
       message: err.message,
     });
   }
+  await BaseDataBase.destroyConnection();
 });

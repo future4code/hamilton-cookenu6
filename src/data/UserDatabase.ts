@@ -38,14 +38,11 @@ export class UserDB extends BaseDataBase {
     return result[0];
   }
 
-  public async deleteUser(id: string): Promise<any> {
-    await this.getConnection().del().from(UserDB.TABLE_NAME).where({ id });
-  }
-
   public async createRecipe(
     id: string,
     title: string,
-    description: string
+    description: string,
+    userId: string
   ): Promise<any> {
     const date = new Date();
     await this.getConnection()
@@ -54,6 +51,7 @@ export class UserDB extends BaseDataBase {
         title,
         description,
         date,
+        userId,
       })
       .into("Recipes");
   }
@@ -77,13 +75,26 @@ export class UserDB extends BaseDataBase {
       SELECT * FROM Followers WHERE "${user_id}" AND "${follower_id}"
     `);
 
+    return result[0][0];
+  }
+
+  public async unfollowUser(
+    user_id: string,
+    follower_id: string
+  ): Promise<void> {
+    await this.getConnection()
+      .del()
+      .from("Followers")
+      .where({ user_id, follower_id });
+  }
+
+  public async getRecipes(): Promise<any> {
+    const result = await this.getConnection().raw(`
+    SELECT Recipes.id, title, description, date, Users.id, name
+    FROM Recipes 
+    JOIN Users 
+    ON Recipes.userId = Users.id;
+    `);
     return result[0];
   }
-
-  public async unfollowUser(user_id: string, follower_id: string): Promise<void> {
-    await this.getConnection().del().from("Followers").where({ user_id, follower_id });    
-  }
-
-  
 }
-
