@@ -88,12 +88,15 @@ export class UserDB extends BaseDataBase {
       .where({ user_id, follower_id });
   }
 
-  public async getRecipes(): Promise<any> {
+  public async getRecipes(id: string): Promise<any> {
     const result = await this.getConnection().raw(`
-    SELECT Recipes.id, title, description, date, Users.id, name
+    SELECT Recipes.id, title, description, date, Users.id, Users.name
     FROM Recipes 
-    JOIN Users 
-    ON Recipes.userId = Users.id;
+    JOIN Followers 
+    ON Recipes.userId = Followers.user_id
+    JOIN Users
+    ON Recipes.userId = Users.id
+    WHERE follower_id = "${id}";
     `);
     return result[0];
   }
