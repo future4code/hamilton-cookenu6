@@ -68,7 +68,15 @@ export class UserDB extends BaseDataBase {
 
   public async followUser(user_id: string, follower_id: string): Promise<void> {
     await this.getConnection()
-      .insert({user_id, follower_id})
-      .into("Followers")      
+      .insert({ user_id, follower_id })
+      .into("Followers");
+  }
+
+  public async checkId(user_id: string, follower_id: string): Promise<any> {
+    const result = await this.getConnection().raw(`
+      SELECT * FROM Followers WHERE "${user_id}" AND "${follower_id}"
+    `);
+
+    return result[0];
   }
 }
