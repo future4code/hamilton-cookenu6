@@ -195,6 +195,11 @@ app.post("/user/follow", async (req: Request, res: Response) => {
     const userId = idData.id;
 
     const followerId = req.body.userToFollowId;
+    const checkUser = await userDb.checkId(userId, followerId)
+    
+    if(checkUser){
+      throw new Error("Ja ta seguindo")
+    }
 
     await userDb.followUser(userId, followerId);
 
