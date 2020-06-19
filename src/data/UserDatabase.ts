@@ -57,4 +57,12 @@ export class UserDB extends BaseDataBase {
       })
       .into("Recipes");
   }
+
+  public async getRecipeById(id: string): Promise<any> {
+    const result = await this.getConnection()
+      .select("*")
+      .from("Recipes")
+      .where({ id });
+    return result[0];
+  }
 }

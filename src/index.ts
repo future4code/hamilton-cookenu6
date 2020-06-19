@@ -165,3 +165,24 @@ app.post("/create/recipe", async (req: Request, res: Response) => {
     });
   }
 });
+
+app.get("/recipe/:id", async (req: Request, res: Response) => {
+  try {
+    const token = req.headers.authorization as string;
+    auth.getData(token);
+
+    const id = req.params.id;
+    const recipeInfo = await userDb.getRecipeById(id);
+
+    res.status(200).send({
+      id: recipeInfo.id,
+      title: recipeInfo.title,
+      description: recipeInfo.description,
+      createdAt: recipeInfo.date,
+    });
+  } catch (err) {
+    res.status(400).send({
+      message: err.message,
+    });
+  }
+});
