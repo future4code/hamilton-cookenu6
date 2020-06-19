@@ -186,3 +186,24 @@ app.get("/recipe/:id", async (req: Request, res: Response) => {
     });
   }
 });
+
+
+app.post("/user/follow", async (req: Request, res: Response) => {
+  try{
+    const token = req.headers.authorization as string;
+    const idData = auth.getData(token);
+    const userId = idData.id;
+
+    const followerId = req.body.userToFollowId;
+
+    await userDb.followUser(userId, followerId);
+
+    res.status(200).send({
+      message: "Seguido com sucesso."
+    });
+  }catch (err) {
+    res.status(400).send({
+      message: err.message,
+    });
+  }
+});

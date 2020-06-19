@@ -65,4 +65,10 @@ export class UserDB extends BaseDataBase {
       .where({ id });
     return result[0];
   }
+
+  public async followUser(user_id: string, follower_id: string): Promise<void> {
+    await this.getConnection()
+      .insert({user_id, follower_id})
+      .into("Followers")      
+  }
 }
