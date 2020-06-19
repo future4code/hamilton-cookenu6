@@ -134,8 +134,6 @@ app.get("/user/:id", async (req: Request, res: Response) => {
   }
 });
 
-
-
 app.post("/create/recipe", async (req: Request, res: Response) => {
   try {
     const token = req.headers.authorization as string;
@@ -143,26 +141,47 @@ app.post("/create/recipe", async (req: Request, res: Response) => {
 
     const recipeData = {
       title: req.body.title,
-      description: req.body.description     
+      description: req.body.description,
     };
 
-    const id = idManager.generate()
-    
-    if(!recipeData.title){
-      throw new Error("Invalid title"); 
+    const id = idManager.generate();
+
+    if (!recipeData.title) {
+      throw new Error("Invalid title");
     }
 
-    if(!recipeData.description){
-      throw new Error("Invalid description"); 
-    }  
-    
-    await userDb.createRecipe( id, recipeData.title, recipeData.description )
+    if (!recipeData.description) {
+      throw new Error("Invalid description");
+    }
+
+    await userDb.createRecipe(id, recipeData.title, recipeData.description);
 
     res.status(200).send({
-      message: "Recipe successfuly registered"
+      message: "Recipe successfuly registered",
     });
   } catch (err) {
+    res.status(400).send({
+      message: err.message,
+    });
+  }
+});
+
+app.get("/recipe/:id", async (req: Request, res: Response) => {
+  try {
+    const token = req.headers.authorization as string;
+    auth.getData(token);
+
+    const id = req.params.id;
+    const recipeInfo = await userDb.getRecipeById(id);
+
     res.status(200).send({
+      id: recipeInfo.id,
+      title: recipeInfo.title,
+      description: recipeInfo.description,
+      createdAt: recipeInfo.date,
+    });
+  } catch (err) {
+    res.status(400).send({
       message: err.message,
     });
   }
