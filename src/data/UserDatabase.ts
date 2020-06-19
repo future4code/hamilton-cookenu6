@@ -77,13 +77,16 @@ export class UserDB extends BaseDataBase {
       SELECT * FROM Followers WHERE "${user_id}" AND "${follower_id}"
     `);
 
-    return result[0];
+    return result[0][0];
   }
 
-  public async unfollowUser(user_id: string, follower_id: string): Promise<void> {
-    await this.getConnection().del().from("Followers").where({ user_id, follower_id });    
+  public async unfollowUser(
+    user_id: string,
+    follower_id: string
+  ): Promise<void> {
+    await this.getConnection()
+      .del()
+      .from("Followers")
+      .where({ user_id, follower_id });
   }
-
-  
 }
-
